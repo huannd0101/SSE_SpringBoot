@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo SSE Spring Boot</title>
+</head>
+
+<body>
+    <div id="root">
+        <h1 id="userId"></h1>
+    </div>
+
+    <script>
+        let root = document.getElementById("root");
+        let userId = Math.floor((Math.random() * 1000) + 1);
+        document.getElementById("root").innerHTML = `UserId: ${userId}`;
+        let urlEndPoint = `http://localhost:8080/subscribe?userId=${userId}`;
+        let eventSource = new EventSource(urlEndPoint);
+
+        eventSource.addEventListener("NEW_DATA", (e) => {
+            console.log(e.data);
+            addBlock(root, e.data);
+        });
+
+        eventSource.addEventListener("error", (e) => {
+            if (e.currentTarget.readyState === EventSource.CLOSED) {
+                console.log(e);
+            } else {
+                eventSource.close();
+            }
+        })
+
+        window.onbeforeunload = () => {
+            eventSource.close();
+        }
+
+        const addBlock = (root, data) => {
+            let element = document.createElement("P");
+            element.innerHTML = data;
+            root.appendChild(element);
+        } 
+    </script>
+</body>
+
+</html>
